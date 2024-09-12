@@ -19,7 +19,6 @@ class RecintosZoo {
     }
 
     analisaRecintos(animal, quantidade) {
-        // Validação de entradas
         if (!this.animais[animal]) return { erro: "Animal inválido" };
         if (quantidade <= 0) return { erro: "Quantidade inválida" };
 
@@ -29,39 +28,32 @@ class RecintosZoo {
 
         for (const recinto of this.recintos) {
             const { numero, bioma, tamanhoTotal, animaisExistentes } = recinto;
-
-            // Verificar se o bioma é compatível
+           
             if (!biomas.includes(bioma) && !(animal === 'HIPOPOTAMO' && bioma.includes('savana') && bioma.includes('rio'))) continue;
-
-            // Verificar se o recinto já contém um carnívoro diferente da mesma espécie
+            
             if (carnivoro && animaisExistentes.some(a => a !== animal)) continue;
-
-            // Verificar se há espaço suficiente
+            
             let espacoOcupado = animaisExistentes.reduce((acc, a) => acc + this.animais[a].tamanho, 0);
             
-            // Considerar o espaço extra caso haja mais de uma espécie
             if (animaisExistentes.length > 0 && !carnivoro) espacoOcupado += 1; 
 
             let espacoLivre = tamanhoTotal - espacoOcupado;
-
-            // Verificar se o espaço livre é suficiente
+            
             if (espacoLivre < tamanhoTotalRequerido) continue;
 
-            // Regra específica para macacos
             if (animal === 'MACACO' && animaisExistentes.length === 0 && espacoLivre < tamanhoTotalRequerido + 1) continue;
 
-            // Adicionar o recinto como viável, calculando o espaço livre restante
             recintosViaveis.push(`Recinto ${numero} (espaço livre: ${espacoLivre - tamanhoTotalRequerido} total: ${tamanhoTotal})`);
         }
 
-        // Ordenar os recintos viáveis pelo número do recinto
+        
         recintosViaveis.sort((a, b) => {
             const numA = parseInt(a.match(/\d+/)[0], 10);
             const numB = parseInt(b.match(/\d+/)[0], 10);
             return numA - numB;
         });
 
-        // Verificação final: Se não houver recintos viáveis
+        
         if (recintosViaveis.length === 0) return { erro: "Não há recinto viável" };
 
         return { recintosViaveis };
