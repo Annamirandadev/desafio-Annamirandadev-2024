@@ -32,13 +32,24 @@ class RecintosZoo {
             // Verificar se o bioma é compatível
             if (!biomas.includes(bioma) && !(bioma.includes('savana') && biomas.includes('rio') && animal === 'HIPOPOTAMO')) continue;
 
+            // Verificar se o recinto já contém um carnívoro diferente da mesma espécie
+            if (carnivoro && animaisExistentes.length > 0 && animaisExistentes[0] !== animal) continue;
+
             // Verificar se há espaço suficiente
-            let espacoOcupado = animaisExistentes.length;
-            let espacoLivre = tamanhoTotal - espacoOcupado;
+            let espacoOcupado = animaisExistentes.length; // Espécies existentes
+            let espacoLivre = tamanhoTotal - (espacoOcupado + (animaisExistentes.length > 0 ? 1 : 0)); // Considera 1 espaço extra se mais de uma espécie
             if (espacoLivre < tamanhoTotalRequerido) continue;
 
+            // Adicionar o recinto como viável, calculando o espaço livre restante
             recintosViaveis.push(`Recinto ${numero} (espaço livre: ${espacoLivre - tamanhoTotalRequerido} total: ${tamanhoTotal})`);
         }
+
+        // Ordenar os recintos viáveis pelo número do recinto
+        recintosViaveis.sort((a, b) => {
+            const numA = parseInt(a.match(/\d+/)[0], 10);
+            const numB = parseInt(b.match(/\d+/)[0], 10);
+            return numA - numB;
+        });
 
         if (recintosViaveis.length === 0) return { erro: "Não há recinto viável" };
         return { recintosViaveis };
