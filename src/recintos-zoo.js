@@ -19,6 +19,7 @@ class RecintosZoo {
     }
 
     analisaRecintos(animal, quantidade) {
+        // Validação de entradas
         if (!this.animais[animal]) return { erro: "Animal inválido" };
         if (quantidade <= 0) return { erro: "Quantidade inválida" };
 
@@ -30,15 +31,24 @@ class RecintosZoo {
             const { numero, bioma, tamanhoTotal, animaisExistentes } = recinto;
 
             // Verificar se o bioma é compatível
-            if (!biomas.includes(bioma) && !(bioma.includes('savana') && biomas.includes('rio') && animal === 'HIPOPOTAMO')) continue;
+            if (!biomas.includes(bioma) && !(animal === 'HIPOPOTAMO' && bioma.includes('savana') && bioma.includes('rio'))) continue;
 
             // Verificar se o recinto já contém um carnívoro diferente da mesma espécie
-            if (carnivoro && animaisExistentes.length > 0 && animaisExistentes[0] !== animal) continue;
+            if (carnivoro && animaisExistentes.some(a => a !== animal)) continue;
 
             // Verificar se há espaço suficiente
-            let espacoOcupado = animaisExistentes.length; // Espécies existentes
-            let espacoLivre = tamanhoTotal - (espacoOcupado + (animaisExistentes.length > 0 ? 1 : 0)); // Considera 1 espaço extra se mais de uma espécie
+            let espacoOcupado = animaisExistentes.reduce((acc, a) => acc + this.animais[a].tamanho, 0);
+            
+            // Considerar o espaço extra caso haja mais de uma espécie
+            if (animaisExistentes.length > 0 && !carnivoro) espacoOcupado += 1; 
+
+            let espacoLivre = tamanhoTotal - espacoOcupado;
+
+            // Verificar se o espaço livre é suficiente
             if (espacoLivre < tamanhoTotalRequerido) continue;
+
+            // Regra específica para macacos
+            if (animal === 'MACACO' && animaisExistentes.length === 0 && espacoLivre < tamanhoTotalRequerido + 1) continue;
 
             // Adicionar o recinto como viável, calculando o espaço livre restante
             recintosViaveis.push(`Recinto ${numero} (espaço livre: ${espacoLivre - tamanhoTotalRequerido} total: ${tamanhoTotal})`);
@@ -51,7 +61,9 @@ class RecintosZoo {
             return numA - numB;
         });
 
+        // Verificação final: Se não houver recintos viáveis
         if (recintosViaveis.length === 0) return { erro: "Não há recinto viável" };
+
         return { recintosViaveis };
     }
 }
